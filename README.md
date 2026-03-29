@@ -110,7 +110,7 @@ version()| Show script version
 
 ---
 
-## 📜 Script Version
+### 📜 Script Version
 
 Current version: v3.1.0
 
@@ -124,7 +124,7 @@ Current version: v3.1.0
 
 ---
 
-## 📚 Use Case
+# 📚 Use Case
 
 This script may be useful for:
 
@@ -133,7 +133,6 @@ This script may be useful for:
 - Device spoofing experiments
 - Reverse engineering practice
 
----
 
 # 👤 Author
 
