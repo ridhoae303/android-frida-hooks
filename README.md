@@ -1,8 +1,18 @@
 # Android Frida Hooks Script
 
-A simple, multi-purpose Frida script for Android testing, spoofing, and basic bypass scenarios.
+A simple, multi-purpose Frida script for Android testing, spoofing, and basic bypass scenarios. This project is mostly experimental and created for learning and testing purposes.
 
-This project is mostly experimental and created for learning and testing purposes.
+## Disclaimer
+
+This project is intended for educational and security research purposes only. Do not use this tool on applications without proper authorization. The author is not responsible for misuse or illegal activities.
+
+## Purpose
+
+This repository is created to help developers and security researchers:
+
+- Learn Android dynamic analysis
+- Understand how Android APIs work
+- Test their own applications
 
 ---
 
@@ -136,6 +146,4 @@ GitHub:
 
 ### 🧃 Disclaimer
 
-This project is intended for educational and research purposes only.
-
-Use responsibly.
+This project is intended for educational and research purposes only. Use responsibly!
