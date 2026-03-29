@@ -141,9 +141,3 @@ This script may be useful for:
 
 GitHub:
 > https://github.com/ridhoae303
-
----
-
-### 🧃 Disclaimer
-
-This project is intended for educational and research purposes only. Use responsibly!
