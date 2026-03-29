@@ -1,4 +1,5 @@
-﻿// Script by ridhoae303
+// Created by ridhoae303
+// Telegram: @ridhoae303 — https://t.me/ridhoae303
 
 var IMEI = "###imei###";
 var AND_ID = "###id###";
