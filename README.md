@@ -1,5 +1,7 @@
 # Android Frida Hooks Script
 
+[![Social Banner](frida-script-banner.jpg)](https://github.com/ridhoae303/android-frida-hooks)
+
 A simple, multi-purpose Frida script for Android testing, spoofing, and basic bypass scenarios. This project is mostly experimental and created for learning and testing purposes.
 
 ## Disclaimer
