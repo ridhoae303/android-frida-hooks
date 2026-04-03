@@ -136,7 +136,7 @@ This script may be useful for:
 - Reverse engineering practice
 
 
-# 👤 Developer
+# 👤 Credits
 
 ### *ridhoae303*
 
