@@ -6,7 +6,7 @@ A simple, multi-purpose Frida script for Android testing, spoofing, and basic by
 
 ## Disclaimer
 
-This project is intended for educational and security research purposes only. Do not use this tool on applications without proper authorization. The author is not responsible for misuse or illegal activities.
+This project is intended for educational and security research purposes only. Do not use this tool on applications without proper authorization. The developer is not responsible for misuse or illegal activities.
 
 ## Purpose
 
