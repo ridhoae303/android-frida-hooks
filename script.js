@@ -1,377 +1,288 @@
-// Created by ridhoae303
-// Telegram: @ridhoae303 — https://t.me/ridhoae303
+﻿var debug = true;
+var sslByp = false;
 
-var IMEI = "###imei###";
-var AND_ID = "###id###";
-var PHONE = "###phone###";
+var IMEI = "";
+var AND_ID = "";
+var PHONE = "";
 var INSTALLER = "com.android.vending";
-var DEVICE_MODEL = "###model###";
-var DEVICE_MANUFACTURER = "###manufacturer###";
-var NETWORK_OPERATOR = "###operator###";
+var DEVICE_MODEL = "";
+var DEVICE_MANUFACTURER = "";
+var NETWORK_OPERATOR = "";
 
-var ENABLE_DEBUG_LOGGING = true;
-var ENABLE_ANTI_DETECTION = true;
-var HOOK_SSL = false;
+var TAG = "[FRIDA]";
+var ver = "4.1.0";
 
-var Log = null;
-var Fix = null;
-var Injector = null;
-var fdone = null;
-var APP_PKG = null;
+function lg(m) { if(debug) console.log(TAG + " " + m); }
+function li(m) { console.log(TAG + " " + m); }
+function le(m) { console.error(TAG + " " + m); }
 
-var TAG_L = "[FRIDA_SCRIPT]";
-var SCRIPT_VERSION = "3.1.0";
-
-function logDebug(message) {
-    if (ENABLE_DEBUG_LOGGING) {
-        console.log(TAG_L + " " + message);
+function genImei() {
+    var pref = ["35","86","89","01","13"];
+    var rand = pref[Math.floor(Math.random() * pref.length)];
+    for(var i=0;i<13;i++) rand += Math.floor(Math.random() * 10);
+    var sum = 0;
+    for(var i=0;i<15;i++) {
+        var digit = parseInt(rand[i]);
+        if(i%2==1) digit *= 2;
+        sum += Math.floor(digit/10) + (digit%10);
     }
+    var checksum = (10 - (sum%10)) % 10;
+    return rand.substring(0,14) + checksum;
 }
 
-function logInfo(message) {
-    console.log(TAG_L + " " + message);
+function genAndroidId() {
+    var hex = "0123456789abcdef";
+    var id = "";
+    for(var i=0;i<16;i++) id += hex[Math.floor(Math.random() * 16)];
+    return id;
 }
 
-function logError(message) {
-    console.error(TAG_L + " [ERROR] " + message);
+function genPhone() {
+    var prefixes = ["0812","0813","0821","0852","0878","0896"];
+    var pref = prefixes[Math.floor(Math.random() * prefixes.length)];
+    for(var i=0;i<8;i++) pref += Math.floor(Math.random() * 10);
+    return pref;
 }
 
-function safeHook(className, methodName, implementation) {
+function genModel() {
+    var models = ["SM-G998B", "Pixel 6 Pro", "IN2023", "LE2115", "M2102J20SG"];
+    return models[Math.floor(Math.random() * models.length)];
+}
+
+function genManufacturer() {
+    var mans = ["samsung", "Google", "OnePlus", "Xiaomi", "Oppo"];
+    return mans[Math.floor(Math.random() * mans.length)];
+}
+
+function genOperator() {
+    var ops = ["Telkomsel", "Indosat", "XL Axiata", "Tri", "Smartfren"];
+    return ops[Math.floor(Math.random() * ops.length)];
+}
+
+function setRandomValues() {
+    IMEI = genImei();
+    AND_ID = genAndroidId();
+    PHONE = genPhone();
+    DEVICE_MODEL = genModel();
+    DEVICE_MANUFACTURER = genManufacturer();
+    NETWORK_OPERATOR = genOperator();
+    li("Generated IMEI: " + IMEI);
+    li("Generated Android ID: " + AND_ID);
+    li("Generated Phone: " + PHONE);
+    li("Generated Model: " + DEVICE_MODEL);
+    li("Generated Manufacturer: " + DEVICE_MANUFACTURER);
+    li("Generated Operator: " + NETWORK_OPERATOR);
+}
+
+function safeHook(cls, method, impl) {
     try {
-        var targetClass = Java.use(className);
-        if (targetClass[methodName]) {
-            targetClass[methodName].implementation = implementation;
-            logDebug("Successfully hooked: " + className + "." + methodName);
+        var target = Java.use(cls);
+        if(target[method]) {
+            target[method].implementation = impl;
+            lg("hooked " + cls + "." + method);
             return true;
         }
-    } catch (e) {
-        logError("Failed to hook " + className + "." + methodName + ": " + e.message);
+    } catch(e) {
+        le("fail " + cls + "." + method + ": " + e.message);
     }
     return false;
 }
 
 function patch() {
-    logInfo("Starting Enhanced Frida Script v" + SCRIPT_VERSION);
-    
-    try {
-        Log = Java.use("android.util.Log");
-        Fix = Java.use("com.frida.Fix");
-        Injector = Java.use("com.frida.injector");
-        fdone = Injector.getAppFilesDir() + "/done";
-        APP_PKG = Injector.getAppPackageName();
-
-        logInfo("Target package: " + APP_PKG);
-        logInfo("[*] Starting comprehensive patching...");
+    li("script v" + ver);
+    Java.perform(function() {
+        try {
+            var pkg = Java.use("android.app.ActivityThread").currentApplication().getPackageName();
+            li("target: " + pkg);
+        } catch(e) { li("cannot get pkg"); }
         
-        safeHook("android.app.ApplicationPackageManager", "getPackageInfo", function(package_name, flags) {
-            var ret = this.getPackageInfo.call(this, package_name, flags);
-            if (APP_PKG == package_name) {
-                logDebug("Get package info for '" + package_name + "' - signatures replaced");
-                ret.signatures = Fix.getSignatures(ret);
-            } else {
-                logDebug("Get package info for '" + package_name + "' - signatures preserved");
-            }
-            return ret;
-        });
-
-        safeHook("android.app.ApplicationPackageManager", "getInstallerPackageName", function(package_name) {
-            var ret = this.getInstallerPackageName.call(this, package_name);
-            logDebug("Get installer for '" + package_name + "' called");
-            if (APP_PKG == package_name && INSTALLER !== "") {
-                ret = INSTALLER;
-                logDebug("Installer package name replaced with: " + INSTALLER);
+        safeHook("android.app.ApplicationPackageManager", "getPackageInfo", function(pkg, flags) {
+            var ret = this.getPackageInfo.call(this, pkg, flags);
+            if(ret && ret.signatures) {
+                var fakeSig = Java.array('android.content.pm.Signature', [Java.use('android.content.pm.Signature').$new("308203c3")]);
+                ret.signatures = fakeSig;
+                lg("sig replaced for " + pkg);
             }
             return ret;
         });
         
-        safeHook("java.security.Signature", "verify", function(signature) {
-            var ret = this.verify.call(this, signature);
-            logDebug("Signature verification intercepted - original: " + ret + ", forced: true");
-            return true;
+        safeHook("android.app.ApplicationPackageManager", "getInstallerPackageName", function(pkg) {
+            var ret = this.getInstallerPackageName.call(this, pkg);
+            try {
+                var currentPkg = Java.use("android.app.ActivityThread").currentApplication().getPackageName();
+                if(pkg === currentPkg) return INSTALLER;
+            } catch(e) {}
+            return ret;
         });
         
-        safeHook("android.app.ApplicationPackageManager", "checkSignatures", function(pkg1, pkg2) {
-            var ret = this.checkSignatures.call(this, pkg1, pkg2);
-            logDebug("checkSignatures intercepted - original: " + ret + ", forced: 0");
-            return 0;
-        });
+        safeHook("java.security.Signature", "verify", function(sig) { return true; });
+        safeHook("android.app.ApplicationPackageManager", "checkSignatures", function(a,b) { return 0; });
         
-        safeHook("android.telephony.TelephonyManager", "getDeviceId", function() {
-            var ret = this.getDeviceId.call(this);
-            if (IMEI !== "") {
-                ret = IMEI;
-                logDebug("IMEI replaced with: " + IMEI);
-            }
-            logDebug("Get device IMEI called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getDeviceId", function(slotIndex) {
-            var ret = this.getDeviceId.call(this, slotIndex);
-            if (IMEI !== "") {
-                ret = IMEI;
-                logDebug("IMEI (slot " + slotIndex + ") replaced with: " + IMEI);
-            }
-            logDebug("Get device IMEI for slot " + slotIndex + " - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getImei", function() {
-            var ret = this.getImei.call(this);
-            if (IMEI !== "") {
-                ret = IMEI;
-                logDebug("getImei() replaced with: " + IMEI);
-            }
-            logDebug("getImei() called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getImei", function(slotIndex) {
-            var ret = this.getImei.call(this, slotIndex);
-            if (IMEI !== "") {
-                ret = IMEI;
-                logDebug("getImei(slot " + slotIndex + ") replaced with: " + IMEI);
-            }
-            logDebug("getImei(slot " + slotIndex + ") called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getMeid", function() {
-            var ret = this.getMeid.call(this);
-            logDebug("Get MEID called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getMeid", function(slotIndex) {
-            var ret = this.getMeid.call(this, slotIndex);
-            logDebug("Get MEID for slot " + slotIndex + " - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getSimSerialNumber", function() {
-            var ret = this.getSimSerialNumber.call(this);
-            logDebug("Get SIM serial number called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getSubscriberId", function() {
-            var ret = this.getSubscriberId.call(this);
-            logDebug("Get subscriber ID called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getLine1Number", function() {
-            var ret = this.getLine1Number.call(this);
-            if (PHONE !== "") {
-                ret = PHONE;
-                logDebug("Phone number replaced with: " + PHONE);
-            }
-            logDebug("Get line 1 number called - returned: " + ret);
-            return ret;
-        });
-
-        safeHook("android.telephony.TelephonyManager", "getNetworkOperatorName", function() {
-            var ret = this.getNetworkOperatorName.call(this);
-            if (NETWORK_OPERATOR !== "") {
-                ret = NETWORK_OPERATOR;
-                logDebug("Network operator replaced with: " + NETWORK_OPERATOR);
-            }
-            logDebug("Get network operator called - returned: " + ret);
-            return ret;
-        });
+        safeHook("android.telephony.TelephonyManager", "getDeviceId", function() { return IMEI; });
+        try {
+            Java.use("android.telephony.TelephonyManager").getDeviceId.overload('int').implementation = function(slot) { return IMEI; };
+        } catch(e) {}
+        safeHook("android.telephony.TelephonyManager", "getImei", function() { return IMEI; });
+        try {
+            Java.use("android.telephony.TelephonyManager").getImei.overload('int').implementation = function(slot) { return IMEI; };
+        } catch(e) {}
+        safeHook("android.telephony.TelephonyManager", "getMeid", function() { return "99000000000000"; });
+        safeHook("android.telephony.TelephonyManager", "getSimSerialNumber", function() { return "8982123456789012345"; });
+        safeHook("android.telephony.TelephonyManager", "getSubscriberId", function() { return "310260123456789"; });
+        safeHook("android.telephony.TelephonyManager", "getLine1Number", function() { return PHONE; });
+        safeHook("android.telephony.TelephonyManager", "getNetworkOperatorName", function() { return NETWORK_OPERATOR; });
         
         safeHook("android.provider.Settings$Secure", "getString", function(resolver, name) {
             var ret = this.getString.call(this, resolver, name);
-            if (name == "android_id" && AND_ID !== "") {
-                ret = AND_ID;
-                logDebug("Android ID replaced with: " + AND_ID);
-            }
+            if(name == "android_id") return AND_ID;
             return ret;
         });
-        
         safeHook("android.provider.Settings$System", "getString", function(resolver, name) {
             var ret = this.getString.call(this, resolver, name);
-            if (name == "android_id" && AND_ID !== "") {
-                ret = AND_ID;
-                logDebug("Android ID (System) replaced with: " + AND_ID);
-            }
+            if(name == "android_id") return AND_ID;
             return ret;
         });
         
-        safeHook("android.os.Build", "MODEL", {
-            get: function() {
-                var ret = this.MODEL.value;
-                if (DEVICE_MODEL !== "") {
-                    ret = DEVICE_MODEL;
-                    logDebug("Device model replaced with: " + DEVICE_MODEL);
-                }
-                logDebug("Build.MODEL called - returned: " + ret);
-                return ret;
+        var Build = Java.use("android.os.Build");
+        Build.MODEL.value = DEVICE_MODEL;
+        Build.MANUFACTURER.value = DEVICE_MANUFACTURER;
+        Build.PRODUCT.value = "razor";
+        Build.BRAND.value = "google";
+        Build.DEVICE.value = "razor";
+        Build.FINGERPRINT.value = "google/razor/razor:5.0.1/LRX22C/1602158:user/release-keys";
+        try { Build.getSerial.implementation = function() { return "0123456789abcdef"; }; } catch(e) {}
+        
+        safeHook("java.io.File", "exists", function() {
+            var p = this.getAbsolutePath();
+            var bad = ["/system/bin/su","/system/xbin/su","/sbin/su","/system/app/Superuser.apk","/system/bin/busybox"];
+            for(var i=0;i<bad.length;i++) {
+                if(p.indexOf(bad[i]) !== -1) return false;
             }
-        });
-
-        safeHook("android.os.Build", "MANUFACTURER", {
-            get: function() {
-                var ret = this.MANUFACTURER.value;
-                if (DEVICE_MANUFACTURER !== "") {
-                    ret = DEVICE_MANUFACTURER;
-                    logDebug("Device manufacturer replaced with: " + DEVICE_MANUFACTURER);
-                }
-                logDebug("Build.MANUFACTURER called - returned: " + ret);
-                return ret;
-            }
-        });
-
-        safeHook("android.os.Build", "PRODUCT", {
-            get: function() {
-                var ret = this.PRODUCT.value;
-                logDebug("Build.PRODUCT called - returned: " + ret);
-                return ret;
-            }
-        });
-
-        safeHook("android.os.Build", "BRAND", {
-            get: function() {
-                var ret = this.BRAND.value;
-                logDebug("Build.BRAND called - returned: " + ret);
-                return ret;
-            }
-        });
-
-        safeHook("android.os.Build", "DEVICE", {
-            get: function() {
-                var ret = this.DEVICE.value;
-                logDebug("Build.DEVICE called - returned: " + ret);
-                return ret;
-            }
+            return this.exists();
         });
         
-        if (ENABLE_ANTI_DETECTION) {
-            logInfo("[*] Enabling anti-detection features...");
-            
-            safeHook("java.io.File", "exists", function() {
-                var path = this.getAbsolutePath.call(this);
-                var ret = this.exists.call(this);
-                
-                var rootPaths = [
-                    "/system/bin/su",
-                    "/system/xbin/su", 
-                    "/sbin/su",
-                    "/system/app/Superuser.apk",
-                    "/system/bin/busybox"
-                ];
-                
-                if (rootPaths.includes(path)) {
-                    logDebug("Root detection bypassed for path: " + path);
-                    return false;
+        try {
+            Java.use("de.robv.android.xposed.XposedBridge").hookAllMethods.implementation = function() { return null; };
+        } catch(e) {}
+        
+        safeHook("java.lang.System", "loadLibrary", function(lib) {
+            if(lib.indexOf("frida") !== -1) return;
+            return this.loadLibrary(lib);
+        });
+        
+        safeHook("android.os.Debug", "isDebuggerConnected", function() { return false; });
+        
+        try {
+            var am = Java.use("android.app.ActivityManager");
+            am.getRunningAppProcesses.implementation = function() {
+                var procs = this.getRunningAppProcesses();
+                var filt = Java.use("java.util.ArrayList").$new();
+                for(var i=0;i<procs.size();i++) {
+                    var p = procs.get(i);
+                    if(p.processName.toLowerCase().indexOf("frida") === -1) filt.add(p);
                 }
-                return ret;
-            });
-            
-            safeHook("de.robv.android.xposed.XposedBridge", "hookAllMethods", function() {
-                logDebug("Xposed detection triggered - bypassing");
-                return null;
-            });
-            
-            safeHook("java.lang.System", "loadLibrary", function(libname) {
-                if (libname === "frida-gadget" || libname === "frida-agent") {
-                    logDebug("Frida detection library load blocked: " + libname);
-                    return;
-                }
-                return this.loadLibrary.call(this, libname);
-            });
+                return filt;
+            };
+        } catch(e) {}
+        
+        if(sslByp) {
+            safeHook("javax.net.ssl.HttpsURLConnection", "setSSLSocketFactory", function(f) {});
+            safeHook("javax.net.ssl.HostnameVerifier", "verify", function(host, sess) { return true; });
         }
         
-        if (HOOK_SSL) {
-            logInfo("[*] Enabling SSL pinning bypass...");
-            
-            safeHook("javax.net.ssl.HttpsURLConnection", "setSSLSocketFactory", function(factory) {
-                logDebug("SSL socket factory setup intercepted");
-                return null;
-            });
-            
-            safeHook("javax.net.ssl.HostnameVerifier", "verify", function(hostname, session) {
-                logDebug("Hostname verification bypassed for: " + hostname);
-                return true;
-            });
-        }
+        try {
+            var ni = Java.use("java.net.NetworkInterface");
+            ni.getHardwareAddress.implementation = function() {
+                return Java.array('byte', [0x02,0x00,0x00,0x00,0x00,0x00]);
+            };
+        } catch(e) {}
         
-        safeHook("android.os.Debug", "isDebuggerConnected", function() {
-            logDebug("Debugger detection bypassed");
-            return false;
-        });
+        try {
+            var Sys = Java.use("java.lang.System");
+            var origProp = Sys.getProperty;
+            Sys.getProperty.implementation = function(key) {
+                var val = origProp.call(this, key);
+                if(key == "ro.debuggable") val = "0";
+                if(key == "ro.secure") val = "1";
+                if(key == "ro.build.tags") val = "release-keys";
+                return val;
+            };
+        } catch(e) {}
         
-        safeHook("android.os.Build", "FINGERPRINT", {
-            get: function() {
-                var ret = this.FINGERPRINT.value;
-                if (ret.includes("test-keys") || ret.includes("generic")) {
-                    ret = "google/razor/razor:5.0.1/LRX22C/1602158:user/release-keys";
-                    logDebug("Emulator fingerprint replaced");
-                }
-                return ret;
-            }
-        });
-
-        logInfo("[*] Patching completed successfully!");
-        logInfo("[*] All hooks are active and running");
-
-    } catch (e) {
-        logError("Error during patching: " + e.toString());
-        logError("Stack trace: " + e.stack);
-    }
-}
-
-if (Java.available) {
-    Java.perform(function() {
-        logInfo("Java VM detected, starting injection...");
-        patch();
+        try {
+            var pkgMgr = Java.use("android.app.ApplicationPackageManager");
+            pkgMgr.hasSystemFeature.implementation = function(feat) {
+                if(feat.indexOf("telephony") !== -1 || feat.indexOf("wifi") !== -1 || feat.indexOf("bluetooth") !== -1) return true;
+                if(feat == "android.hardware.type.watch") return false;
+                return this.hasSystemFeature(feat);
+            };
+        } catch(e) {}
+        
+        li("anti-kill hooks");
+        try {
+            Java.use("android.app.Activity").finish.implementation = function() { lg("finish blocked"); };
+            Java.use("android.app.Activity").finishAffinity.implementation = function() { lg("finishAffinity blocked"); };
+            Java.use("android.app.Activity").moveTaskToBack.implementation = function(flag) { return false; };
+        } catch(e) {}
+        try {
+            Java.use("java.lang.System").exit.implementation = function(code) { lg("exit blocked"); };
+            Java.use("java.lang.System").runFinalizersOnExit.implementation = function(val) {};
+        } catch(e) {}
+        try {
+            Java.use("android.os.Process").killProcess.implementation = function(pid) { lg("killProcess blocked"); };
+            Java.use("android.os.Process").sendSignal.implementation = function(pid, sig) {
+                if(sig==9 || sig==15) return;
+                return this.sendSignal(pid, sig);
+            };
+        } catch(e) {}
+        try {
+            var am2 = Java.use("android.app.ActivityManager");
+            am2.killBackgroundProcesses.implementation = function(pkg) { lg("killBackground blocked for "+pkg); };
+            am2.restartPackage.implementation = function(pkg) { lg("restartPackage blocked for "+pkg); };
+        } catch(e) {}
+        
+        li("play integrity bypass");
+        try {
+            var dgc = Java.use("com.google.android.gms.droidguard.DroidGuardClient");
+            dgc.attest.implementation = function(params, cb) {
+                var fake = Java.use("org.json.JSONObject").$new();
+                fake.put("tokenResult", "fake_token_" + Date.now());
+                cb.onSuccess(fake);
+            };
+        } catch(e) {}
+        try {
+            var integrity = Java.use("com.google.android.play.core.integrity.IntegrityManager");
+            integrity.requestIntegrityToken.implementation = function(req, cb) {
+                cb.onSuccess("fake_integrity_token");
+            };
+        } catch(e) {}
+        try {
+            var snet = Java.use("com.google.android.gms.safetynet.SafetyNetApi");
+            snet.attest.implementation = function(client, nonce) { return null; };
+        } catch(e) {}
+        
+        li("patch complete");
     });
-} else {
-    logError("Java VM not available!");
 }
 
+setRandomValues();
 setTimeout(function() {
-    if (Java.available) {
-        Java.perform(function() {
-            logInfo("Delayed injection started...");
-            patch();
-        });
+    if(Java.available) {
+        patch();
+    } else {
+        le("Java not available");
     }
-}, 1000);
-
-function reloadConfig() {
-    logInfo("Reloading configuration...");
-    patch();
-}
-
-function listHooks() {
-    logInfo("Active hooks:");
-    logInfo("- Package Manager hooks");
-    logInfo("- Telephony Manager hooks"); 
-    logInfo("- Settings Secure hooks");
-    logInfo("- Build information hooks");
-    logInfo("- Security bypass hooks");
-    if (ENABLE_ANTI_DETECTION) logInfo("- Anti-detection hooks");
-    if (HOOK_SSL) logInfo("- SSL pinning bypass hooks");
-}
-
-function disableHooks() {
-    logInfo("Disabling all hooks...");
-    Java.perform(function() {
-        Java.deoptimizeEverything();
-    });
-}
+}, 100);
 
 rpc.exports = {
-    reload: reloadConfig,
-    list: listHooks,
-    disable: disableHooks,
-    version: function() { return SCRIPT_VERSION; }
+    setImei: function(v) { IMEI = v; li("IMEI updated to " + v); },
+    setAndroidId: function(v) { AND_ID = v; li("Android ID updated to " + v); },
+    setPhone: function(v) { PHONE = v; li("Phone updated to " + v); },
+    setModel: function(v) { DEVICE_MODEL = v; li("Model updated to " + v); },
+    setManufacturer: function(v) { DEVICE_MANUFACTURER = v; li("Manufacturer updated to " + v); },
+    setOperator: function(v) { NETWORK_OPERATOR = v; li("Operator updated to " + v); },
+    reload: function() { patch(); },
+    version: function() { return ver; }
 };
 
-logInfo("Enhanced Frida Script v" + SCRIPT_VERSION + " loaded successfully!");
-logInfo("Use rpc.exports to control the script:");
-logInfo("  - reload(): Reload configuration");
-logInfo("  - list(): List active hooks"); 
-logInfo("  - disable(): Disable all hooks");
-logInfo("  - version(): Get script version");
+li("Script v" + ver + " loaded. Use rpc.exports to change values.");
