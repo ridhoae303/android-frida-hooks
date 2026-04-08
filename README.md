@@ -12,8 +12,7 @@ This started as a personal learning project while messing around with Android dy
 
 This project is for **educational and security research purposes only**.
 
-Don't use this on apps you don't own or don't have permission to test.  
-If you misuse it, that's on you.
+Don't use this on apps you don't own or don't have permission to test. If you misuse it, that's on you.
 
 ---
 
@@ -150,7 +149,7 @@ Disable Anti-Detection (not recommended)
 var hide_traces = true;   // change to false
 ```
 
-# 🚀 Usage
+## 🚀 Usage
 
 Load the script with Frida:
 
@@ -188,7 +187,7 @@ Current version: **4.1.0**
 
 ---
 
-# ⚠️ Notes
+## ⚠️ Notes
 
 Fully self-contained — no external dependencies
 
@@ -200,7 +199,7 @@ This is experimental — don't expect it to bypass everything
 
 ---
 
-# 📚 Use Cases
+## 📚 Use Cases
 
 Useful for:
 - Android testing
