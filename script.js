@@ -1,7 +1,6 @@
 ﻿// Created by ridhoae303
 // TG: @ridhoae303
 
-
 var debug = true;
 var sslByp = false;
 
