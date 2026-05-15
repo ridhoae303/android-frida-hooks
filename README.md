@@ -6,17 +6,13 @@ Multi-purpose Frida script for Android testing, spoofing, and basic bypass scena
 
 This started as a personal learning project while messing around with Android dynamic analysis. Most of what's here is experimental, but useful enough to share.
 
----
-
-## ⚠️ Disclaimer
+## Disclaimer
 
 This project is for **educational and security research purposes only**.
 
 Don't use this on apps you don't own or don't have permission to test. If you misuse it, that's on you.
 
----
-
-## 🎯 Why this exists
+## Why this exists
 
 Made mainly to:
 
@@ -26,9 +22,7 @@ Made mainly to:
 - Try basic bypass and spoofing techniques
 - Break things and see what happens
 
----
-
-## 📦 Features
+## Features
 
 ### Package & Signature Hooks
 
@@ -36,8 +30,6 @@ Made mainly to:
 - Bypass signature verification (always returns `true`)
 - Fake installer package name (defaults to Play Store)
 - Override `checkSignatures()` to always return `0`
-
----
 
 ### Device Spoofing  
 *(auto-generated — no hardcoded values)*
@@ -52,8 +44,6 @@ Everything is generated automatically when the script loads.
 - Manufacturer — randomly selected
 
 All values can still be changed later using RPC.
-
----
 
 ### Anti-Detection & Hiding
 
@@ -72,8 +62,6 @@ All values can still be changed later using RPC.
 - Fakes `hasSystemFeature()` results  
   (telephony / wifi / bluetooth)
 
----
-
 ### Anti-Kill / Anti-Exit
 
 Stops apps from killing themselves.
@@ -88,16 +76,12 @@ Stops apps from killing themselves.
 - Blocks `ActivityManager.killBackgroundProcesses()`
 - Blocks `restartPackage()`
 
----
-
 ### SSL Bypass *(Optional)*
 
 - Disables SSL pinning  
   *(just flip the flag in the script)*
 - Overrides `HostnameVerifier`  
   (trusts all hosts)
-
----
 
 ### Play Integrity / SafetyNet *(Experimental)*
 
@@ -107,8 +91,6 @@ Still experimental. Might need tweaks depending on the target app.
 - Hooks `IntegrityManager.requestIntegrityToken()` → returns fake token
 - Hooks `SafetyNetApi.attest()` → returns `null`
 
----
-
 ### Other Stuff
 
 - Spoofs `Build.getSerial()`
@@ -117,9 +99,7 @@ Still experimental. Might need tweaks depending on the target app.
 
 No manual editing needed.
 
----
-
-## ⚙️ Configuration
+## Configuration
 
 Out of the box, **you don't need to change anything**.
 
@@ -134,8 +114,6 @@ The script automatically generates:
 
 If you want to tweak behavior, edit these flags inside the script.
 
----
-
 ### Examples
 
 ```javascript
@@ -149,7 +127,7 @@ Disable Anti-Detection (not recommended)
 var hide_traces = true;   // change to false
 ```
 
-## 🚀 Usage
+## Usage
 
 Load the script with Frida:
 
@@ -157,9 +135,7 @@ Load the script with Frida:
 frida -U -f com.target.app -l script.js
 ```
 
----
-
-## 🧪 RPC Commands
+## RPC Commands
 
 You can change spoofed values while the script is running.
 
@@ -179,15 +155,11 @@ Example inside Frida REPL:
 rpc.exports.setImei("358901234567890");
 ```
 
----
-
-## 📜 Version
+## Version
 
 Current version: **4.1.0**
 
----
-
-## ⚠️ Notes
+## Notes
 
 Fully self-contained — no external dependencies
 
@@ -197,9 +169,7 @@ If an app crashes, try disabling anti-kill hooks first
 
 This is experimental — don't expect it to bypass everything
 
----
-
-## 📚 Use Cases
+## Use Cases
 
 Useful for:
 - Android testing
@@ -208,8 +178,10 @@ Useful for:
 - Reverse engineering practice
 - Testing basic integrity checks
 
-# 👤 Credits
+### Created by
 
-> **ridhoae303**
-
-GitHub: https://github.com/ridhoae303
+<p align="center">
+  <a href="https://github.com/ridhoae303">
+    <img src="https://img.shields.io/badge/Built%20by-@ridhoae303-111111?style=for-the-badge&logo=github">
+  </a>
+</p>
