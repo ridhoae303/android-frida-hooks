@@ -182,7 +182,7 @@ Useful for:
 
 <p align="center">
   <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-ridhoae303%20-cyan.svg" alt="License">
+    <img src="https://img.shields.io/badge/License-ridhoae303%20-blue.svg" alt="License">
   </a>
 </p>
 
