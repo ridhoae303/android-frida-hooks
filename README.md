@@ -178,6 +178,14 @@ Useful for:
 - Reverse engineering practice
 - Testing basic integrity checks
 
+### LICENSE
+
+<p align="center">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-ridhoae303%20-cyan.svg" alt="License">
+  </a>
+</p>
+
 ### Created by
 
 <p align="center">
