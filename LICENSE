@@ -1,0 +1,45 @@
+ANDROID FRIDA HOOKS LICENSE
+
+Copyright (C) 2026 ridhoae303 (https://github.com/ridhoae303)
+
+For the Android Frida Hooks Script (and whatever else I toss in this repo)
+
+This is the real deal – straight talk, no chaser. By grabbin’ or usin’ this code, you’re agreein’ to the terms below. If you can’t hang, just close the tab, no hard feelings.
+
+a) What you can do with this
+
+• Learn & tinker. You’re free to poke around, break stuff, and see how Android APIs dance under the hood. That’s literally why I made this.
+• Test your own apps or apps you’ve got written permission to mess with. Go nuts in your controlled sandbox.
+• Share the knowledge. Fork it, blog about it, teach a class with it — as long as you keep this same license vibe and don’t pretend you wrote the whole thing from scratch.
+• Tweak it to fit your needs. Rename variables, add your own spice, whatever. Just don’t come cryin’ if you brick your test device.
+
+b) What you absolutely CAN’T do
+
+• Use this on apps you don’t own or ain’t authorized to test. Seriously, don’t be that person. If you pull some shady stuff, that’s 100% on you – I don’t know you, and I’m not your lawyer.
+• Sell this script as a standalone product. C’mon, that’s just lazy. If you build something cool on top of it and wanna sell that, fine, but don’t just repackage my work and slap a price tag on it.
+• Claim it’s yours. Give credit where it’s due. A lil’ shoutout to the original repo goes a long way.
+• Use it to break laws, violate terms of service, or mess with folks’ privacy. I ain’t about that life. If you catch a case, I’m not pickin’ up the phone.
+
+c) No warranties, no promises, nada
+
+This script is like a box of mystery chocolates – you never know what you’re gonna get on your specific device & target app. It’s provided “as is,” with all its janky, experimental glory. I’m not promising it’ll bypass every check, work on every Android flavor, or not accidentally crash your grandma’s banking app (please don’t test on your grandma’s phone, though).
+
+d) Cover your own assets
+
+If using this code somehow breaks your device, wipes your data, gets you banned from a service, or makes your cat run away – I’m not liable. You chose to run it, you own the consequences. This is researchware, not production-ready enterprise software.
+
+e) Be cool, and don’t ruin the tool
+
+This repo exists for education and legit security research. If you misuse it and bring heat onto the Frida community or make developers hate us more than they already do, you’re part of the problem. Play smart, stay ethical, keep it low-key.
+
+f) Contributions
+
+If you submit pull requests, you agree that your contributions will be licensed under this same license. By contributing, you confirm that you have the right to do so and that your work doesn’t infringe on anyone else’s rights.
+
+g) Termination
+
+This license automatically terminates if you violate any of its terms. When that happens, you must destroy all copies of the code in your possession. The parts about no warranties and limitation of liability will survive any termination.
+
+h) Affirmation
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. Don’t do illegal stuff. You’re responsible for your own actions.
